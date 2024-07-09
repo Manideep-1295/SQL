@@ -137,13 +137,32 @@ WHERE CustomerID = @cid
 
 SELECT * FROM Customers
 -- 8. Write an SQL query to recalculate and update the total cost of each order in the "Orders" table based on the prices and quantities in the "OrderDetails" table.
+select * from orders;
+select * from Products;
+select * from OrderDetails;
 
+UPDATE Orders 
+SET  Orders.TotalAmount = test.new 
+from Orders
+inner join (
+    SELECT od.OrderID,SUM(p.Price * od.Quantity) as new
+    FROM OrderDetails od
+	join products as p on od.ProductID = p.ProductID
+	join orders as o on o.OrderID = od.orderID
+    WHERE od.ProductID = p.ProductID
+	group by od.OrderID) 
+	as test on Orders.OrderID = test.OrderID 
+
+select * from Orders
 -- 9. Write an SQL query to delete all orders and their associated order details for a specific customer from the "Orders" and "OrderDetails" tables. Allow users to input the customer ID as a parameter.
+DECLARE @inp int
+set @inp = 1
+
 DELETE FROM OrderDetails
-WHERE OrderID = 1
+WHERE OrderID = @inp
 
 DELETE FROM Orders
-WHERE CustomerID = 1
+WHERE CustomerID = @inp
 
 
 -- 10. Write an SQL query to insert a new electronic gadget product into the "Products" table, including product name, category, price, and any other relevant details.
@@ -152,8 +171,11 @@ INSERT INTO Products VALUES
 
 SELECT * FROM Products
 -- 11. Write an SQL query to update the status of a specific order in the "Orders" table (e.g., from "Pending" to "Shipped"). Allow users to input the order ID and the new status.
-DECLARE @statusmsg VARCHAR(10)
-SET @statusmsg = 'Shipped'
+DECLARE @status_msg nVarchar(15)
+SET @status_msg = 'Shipped'
+
+DECLARE @order_id int
+set @order_id = 3
 
 ALTER TABLE Orders
 ADD Status VARCHAR(10);
@@ -161,8 +183,8 @@ ADD Status VARCHAR(10);
 SELECT * FROM Orders
 
 UPDATE Orders
-SET "Status" = @statusmsg
-WHERE OrderID = 2
+SET Status = 'Shipped'
+WHERE OrderID = @order_id
 
 SELECT * FROM Orders
 
@@ -202,6 +224,8 @@ ON p.ProductID = od.ProductID
 group by p.ProductID
 
 -- 15. Write an SQL query to list all customers who have made at least one purchase. Include their names and contact information.
+USE Assignment_1
+
 SELECT CONCAT(c.FirstName,' ',c.LastName) AS CustomerName, c.Phone FROM Customers c
 JOIN Orders o
 ON c.CustomerID = o.CustomerID
@@ -209,3 +233,9 @@ JOIN OrderDetails od
 ON o.OrderID = od.OrderID
 WHERE EXISTS (SELECT OrderID FROM OrderDetails)
 
+SELECT * FROM OrderDetails
+SELECT * FROM Orders
+
+SELECT CONCAT(c.FirstName,' ',c.LastName) AS CustomerName, c.Phone 
+FROM Customers c
+WHERE EXISTS (SELECT OrderID FROM OrderDetails)
